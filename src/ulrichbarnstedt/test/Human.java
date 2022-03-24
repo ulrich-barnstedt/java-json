@@ -3,6 +3,7 @@ package ulrichbarnstedt.test;
 import ulrichbarnstedt.lib.json.AnnotationJSONSerializer;
 import ulrichbarnstedt.lib.json.JSONProperty;
 
+@JSONProperty
 public class Human extends AnnotationJSONSerializer {
     @JSONProperty private String firstName;
     @JSONProperty(key = "lAsTnAmE") private String lastName;

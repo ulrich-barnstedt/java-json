@@ -39,7 +39,7 @@ abstract public class AnnotationJSONSerializer implements JSONSerializable {
         if (this.getClass().isAnnotationPresent(JSONProperty.class)) {
             JSONProperty annotation = this.getClass().getAnnotation(JSONProperty.class);
             String key = annotation.key().equals("") ? "class" : annotation.key();
-            String value = this.getClass().getName();
+            String value = "\"" + this.getClass().getSimpleName() + "\"";
 
             content.put(key, value);
         }

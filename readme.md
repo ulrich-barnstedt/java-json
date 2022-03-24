@@ -12,6 +12,7 @@ package ulrichbarnstedt.test;
 import ulrichbarnstedt.lib.json.AnnotationJSONSerializer;
 import ulrichbarnstedt.lib.json.JSONProperty;
 
+@JSONProperty
 public class Human extends AnnotationJSONSerializer {
     @JSONProperty private String firstName;
     @JSONProperty(key = "lAsTnAmE") private String lastName;
@@ -36,9 +37,11 @@ public class Human extends AnnotationJSONSerializer {
 Outputs:
 ```json
 {
+  "class" : "Human",
   "firstName" : "jef",
   "lAsTnAmE" : "jef",
   "someOtherGuy" : {
+    "class" : "Human",
     "firstName" : "sub",
     "lAsTnAmE" : "guy",
     "someOtherGuy" : null,
