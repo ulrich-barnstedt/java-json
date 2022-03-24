@@ -44,14 +44,20 @@ abstract public class AnnotationJSONSerializer implements JSONSerializable {
             content.put(key, value);
         }
 
-        for (Field field : this.getClass().getDeclaredFields()) {
-            //only fields with the JSONProperty annotation
-            if (!field.isAnnotationPresent(JSONProperty.class)) continue;
+        //crawl through the whole class tree to get inherited fields
+        Class hierachy = this.getClass();
+        while (hierachy != Object.class) {
+            for (Field field : hierachy.getDeclaredFields()) {
+                //only fields with the JSONProperty annotation
+                if (!field.isAnnotationPresent(JSONProperty.class)) continue;
 
-            JSONProperty annotation = field.getAnnotation(JSONProperty.class);
-            String key = annotation.key().equals("") ? field.getName() : annotation.key();
+                JSONProperty annotation = field.getAnnotation(JSONProperty.class);
+                String key = annotation.key().equals("") ? field.getName() : annotation.key();
 
-            content.put(key, processFieldValue(indent, field));
+                content.put(key, processFieldValue(indent, field));
+            }
+
+            hierachy = hierachy.getSuperclass();
         }
 
         return content;

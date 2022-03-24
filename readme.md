@@ -2,7 +2,27 @@
 `ulrichbarnstedt.lib.json`
 
 A small library to make converting classes to JSON easier.  
-Note: Classes themselves can also be annotated for use cases such as deserializing the data later on.
+Supports inheritance (will crawl all superclasses).  
+Note: Classes themselves can also be annotated for use cases such as deserializing the data later on.  
+
+### Extending functionality
+
+Classes that cannot be converted using the provided annotations but should still be able to support the toJSON method
+(which is handy because this allows objects as properties to work) can be created using the `JSONSerializable` interface.  
+Example:
+```java
+package ulrichbarnstedt.test;
+
+import ulrichbarnstedt.lib.json.JSONSerializable;
+
+public class ClassWithCustomSerializer implements JSONSerializable {
+
+    @Override
+    public String toJSON (int indent) {
+        // return the JSON of this class at the correct indent
+    }
+}
+```
 
 ### Example
 
