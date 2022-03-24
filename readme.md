@@ -1,7 +1,8 @@
 ## java-json
 `ulrichbarnstedt.lib.json`
 
-A small library to make converting classes to JSON easier.
+A small library to make converting classes to JSON easier.  
+Note: Classes themselves can also be annotated for use cases such as deserializing the data later on.
 
 ### Example
 

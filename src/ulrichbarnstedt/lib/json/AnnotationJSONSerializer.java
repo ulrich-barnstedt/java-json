@@ -35,6 +35,15 @@ abstract public class AnnotationJSONSerializer implements JSONSerializable {
     private LinkedHashMap<String, String> parseAnnotations (int indent) {
         LinkedHashMap<String, String> content = new LinkedHashMap<>();
 
+        //check if the class itself is annotated, if yes take the name as a string
+        if (this.getClass().isAnnotationPresent(JSONProperty.class)) {
+            JSONProperty annotation = this.getClass().getAnnotation(JSONProperty.class);
+            String key = annotation.key().equals("") ? "class" : annotation.key();
+            String value = this.getClass().getName();
+
+            content.put(key, value);
+        }
+
         for (Field field : this.getClass().getDeclaredFields()) {
             //only fields with the JSONProperty annotation
             if (!field.isAnnotationPresent(JSONProperty.class)) continue;
