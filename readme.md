@@ -9,7 +9,7 @@ Note: Classes themselves can also be annotated for use cases such as deserializi
 
 Classes that cannot be converted using the provided annotations but should still be able to support the toJSON method
 (which is handy because this allows objects as properties to work) can be created using the `JSONSerializable` interface.  
-Example:
+Example implementation:
 ```java
 package ulrichbarnstedt.test;
 
@@ -24,7 +24,7 @@ public class ClassWithCustomSerializer implements JSONSerializable {
 }
 ```
 
-### Example
+### Example code
 
 ```java
 package ulrichbarnstedt.test;
@@ -32,10 +32,15 @@ package ulrichbarnstedt.test;
 import ulrichbarnstedt.lib.json.AnnotationJSONSerializer;
 import ulrichbarnstedt.lib.json.JSONProperty;
 
+//include the name of the class as a property, for example for use in deserialization
+//also supports using a custom key
 @JSONProperty
 public class Human extends AnnotationJSONSerializer {
     @JSONProperty private String firstName;
+    
+    //include this variable as a property, but with a custom key - see below
     @JSONProperty(key = "lAsTnAmE") private String lastName;
+    
     @JSONProperty private Human someOtherGuy;
     @JSONProperty private long socSecNum;
 
