@@ -1,10 +1,12 @@
 package ulrichbarnstedt.test;
 
 import ulrichbarnstedt.lib.json.AnnotationJSONSerializer;
+import ulrichbarnstedt.lib.json.JSONObject;
 import ulrichbarnstedt.lib.json.JSONProperty;
 
-@JSONProperty
-public class Human extends AnnotationJSONSerializer {
+@JSONObject
+@JSONProperty(key = "className")
+public class Human {
     @JSONProperty private String firstName;
     @JSONProperty(key = "lAsTnAmE") private String lastName;
     @JSONProperty private Human someOtherGuy;
@@ -20,6 +22,7 @@ public class Human extends AnnotationJSONSerializer {
     public static void main (String[] args) {
         Human testHuman = new Human("sub", "guy", 54321, null);
         Human human = new Human("jef", "jef", 12345, testHuman);
-        System.out.println(human.toJSON());
+
+        System.out.println(AnnotationJSONSerializer.toJSON(human));
     }
 }
