@@ -4,14 +4,14 @@ import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
-abstract public class AnnotationJSONSerializer implements JSONSerializable {
-    private String processFieldValue (int indent, Field field) {
+abstract public class AnnotationJSONSerializer {
+    private static String processFieldValue (Object instance, int indent, Field field) {
         Object fieldValue;
         try {
             //make accessible to ensure the annotation works
             field.setAccessible(true);
 
-            fieldValue = field.get(this);
+            fieldValue = field.get(instance);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
             return "null";
@@ -29,23 +29,27 @@ abstract public class AnnotationJSONSerializer implements JSONSerializable {
             return ((JSONSerializable) fieldValue).toJSON(indent + 1);
         }
 
-        return fieldValue.toString();
+        if (fieldValue.getClass().isAnnotationPresent(JSONObject.class)) {
+            return AnnotationJSONSerializer.toJSON(fieldValue, indent + 1);
+        }
+
+        return "\"" + fieldValue + "\"";
     }
 
-    private LinkedHashMap<String, String> parseAnnotations (int indent) {
+    private static LinkedHashMap<String, String> parseAnnotations (Object instance, int indent) {
         LinkedHashMap<String, String> content = new LinkedHashMap<>();
 
         //check if the class itself is annotated, if yes take the name as a string
-        if (this.getClass().isAnnotationPresent(JSONProperty.class)) {
-            JSONProperty annotation = this.getClass().getAnnotation(JSONProperty.class);
+        if (instance.getClass().isAnnotationPresent(JSONProperty.class)) {
+            JSONProperty annotation = instance.getClass().getAnnotation(JSONProperty.class);
             String key = annotation.key().equals("") ? "class" : annotation.key();
-            String value = "\"" + this.getClass().getSimpleName() + "\"";
+            String value = "\"" + instance.getClass().getSimpleName() + "\"";
 
             content.put(key, value);
         }
 
         //crawl through the whole class tree to get inherited fields
-        Class hierachy = this.getClass();
+        Class<?> hierachy = instance.getClass();
         while (hierachy != Object.class) {
             for (Field field : hierachy.getDeclaredFields()) {
                 //only fields with the JSONProperty annotation
@@ -54,25 +58,29 @@ abstract public class AnnotationJSONSerializer implements JSONSerializable {
                 JSONProperty annotation = field.getAnnotation(JSONProperty.class);
                 String key = annotation.key().equals("") ? field.getName() : annotation.key();
 
-                content.put(key, processFieldValue(indent, field));
+                content.put(key, AnnotationJSONSerializer.processFieldValue(instance, indent, field));
             }
 
-            hierachy = hierachy.getSuperclass();
+            if (hierachy.getSuperclass().isAnnotationPresent(JSONObject.class) || JSONSerializable.class.isAssignableFrom(hierachy))
+                hierachy = hierachy.getSuperclass();
+            else break;
         }
 
         return content;
     }
 
-    private String buildIndent (int indent) {
+    private static String buildIndent (int indent) {
         StringBuilder indentBuilder = new StringBuilder();
         for (int i = 0; i < indent; i++) indentBuilder.append("  ");
         return indentBuilder.toString();
     }
 
-    @Override
-    public String toJSON (int indent) {
-        LinkedHashMap<String, String> content = this.parseAnnotations(indent);
-        String indentString = this.buildIndent(indent);
+    private static String toJSON (Object instance, int indent) {
+        if (!instance.getClass().isAnnotationPresent(JSONObject.class)) return "\"" + instance.toString() + "\"";
+        if (instance instanceof JSONSerializable) return ((JSONSerializable) instance).toJSON(indent + 1);
+
+        LinkedHashMap<String, String> content = AnnotationJSONSerializer.parseAnnotations(instance, indent);
+        String indentString = AnnotationJSONSerializer.buildIndent(indent);
 
         StringBuilder json = new StringBuilder();
         json.append("{\n");
@@ -91,5 +99,20 @@ abstract public class AnnotationJSONSerializer implements JSONSerializable {
 
         json.append(indentString).append("}");
         return json.toString();
+    }
+
+    public static String toJSON (Object instance) {
+        return AnnotationJSONSerializer.toJSON(instance, 0);
+    }
+
+
+    //for inheriting classes
+
+    public String toJSON () {
+        return this.toJSON(0);
+    }
+
+    public String toJSON (int indent) {
+        return AnnotationJSONSerializer.toJSON(this, indent);
     }
 }
