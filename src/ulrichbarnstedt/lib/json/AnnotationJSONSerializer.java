@@ -76,8 +76,8 @@ abstract public class AnnotationJSONSerializer {
     }
 
     private static String toJSON (Object instance, int indent) {
-        if (!instance.getClass().isAnnotationPresent(JSONObject.class)) return "\"" + instance.toString() + "\"";
         if (instance instanceof JSONSerializable) return ((JSONSerializable) instance).toJSON(indent + 1);
+        if (!instance.getClass().isAnnotationPresent(JSONObject.class)) return "\"" + instance.toString() + "\"";
 
         LinkedHashMap<String, String> content = AnnotationJSONSerializer.parseAnnotations(instance, indent);
         String indentString = AnnotationJSONSerializer.buildIndent(indent);
